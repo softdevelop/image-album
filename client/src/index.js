@@ -6,6 +6,7 @@ import registerServiceWorker from './registerServiceWorker';
 import { Provider } from 'react-redux';
 // import reducer from "./reducers/index"
 import store from "./redux/store"
+import 'antd/dist/antd.css'; // or 'antd/dist/antd.less'
 
 
 // const baseUrl = document.getElementsByTagName('base')[0].getAttribute('href');

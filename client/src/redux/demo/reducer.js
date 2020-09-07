@@ -1,16 +1,17 @@
-import { DEMO_ACTION } from './actionTypes'
-const INITIAL_STATE = {
-  data: {},
-  loading: false
+import { GET_ALL_IMAGES } from "./actionTypes";
+
+const initState = {
+  images: {},
 };
-export default (state = INITIAL_STATE, { type, payload }) => {
-  switch (type) {
-    case DEMO_ACTION: {
+
+export default function (state = initState, action) {
+  switch (action.type) {
+    case GET_ALL_IMAGES:
       return {
         ...state,
-        data: payload
-      }
-    }
-    default: return state;
+        images: action.data,
+      };
+    default:
+      return state;
   }
 }

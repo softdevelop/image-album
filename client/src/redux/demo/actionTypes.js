@@ -1,2 +1,1 @@
-export const DEMO_ACTION = "DEMO_ACTION";
-export const DEMO_ACTION_SUCCESS = "DEMO_ACTION_SUCCESS";
+export const GET_ALL_IMAGES = "GET_ALL_IMAGES";
