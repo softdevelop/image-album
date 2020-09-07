@@ -1,7 +1,8 @@
-import { GET_ALL_IMAGES } from "./actionTypes";
+import { GET_ALL_IMAGES, UPLOAD_IMAGES } from "./actionTypes";
 
 const initState = {
   images: {},
+  isUploadSuccess: false,
 };
 
 export default function (state = initState, action) {
@@ -10,6 +11,11 @@ export default function (state = initState, action) {
       return {
         ...state,
         images: action.data,
+      };
+    case UPLOAD_IMAGES:
+      return {
+        ...state,
+        isUploadSuccess: true,
       };
     default:
       return state;
