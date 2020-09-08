@@ -1,8 +1,9 @@
-import { GET_ALL_IMAGES, UPLOAD_IMAGES } from "./actionTypes";
+import { GET_ALL_IMAGES, UPLOAD_IMAGES, DELETE_IMAGES } from "./actionTypes";
 
 const initState = {
   images: {},
   isUploadSuccess: false,
+  isDeleteSuccess: false,
 };
 
 export default function (state = initState, action) {
@@ -16,6 +17,11 @@ export default function (state = initState, action) {
       return {
         ...state,
         isUploadSuccess: true,
+      };
+    case DELETE_IMAGES:
+      return {
+        ...state,
+        isDeleteSuccess: true,
       };
     default:
       return state;

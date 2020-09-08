@@ -19,15 +19,29 @@
     margin-top: 30px;
     .col-image {
       margin-bottom: 30px;
+      flex-basis: 20%;
+      width: 20%;
     }
     .content-image {
+      position: relative;
       height: 100%;
       .image-list {
+        cursor: pointer;
+        border-radius: 5px;
         width: 100%;
-        height: 230px;
+        height: 200px;
       }
       p {
-        color: red;
+        color: black;
+        font-size: 15px;
+      }
+      .checkbox-image {
+        position: absolute;
+        top: 2px;
+        left: 5px;
+      }
+      .no-select-image {
+        opacity: 0.5;
       }
     }
   }
@@ -38,6 +52,11 @@
 .bottom-upload-image {
   justify-content: space-between;
   display: flex;
+  margin-top: 20px;
+  .disable-upload {
+    pointer-events: none;
+    opacity: 0.4;
+  }
 }
 .upload-space {
   display: flex;
@@ -48,4 +67,28 @@
   h4 {
     cursor: pointer;
   }
+}
+
+.upload-space-modal {
+  margin-top: 3px;
+}
+
+.delete-space {
+  margin-right: 20px;
+  padding-left: 10px;
+  padding-top: 4px;
+  cursor: pointer;
+  display: flex;
+  background: #ebebeb;
+  height: 50%;
+  .icon-upload {
+    margin-top: 5px;
+    margin-right: 5px;
+  }
+}
+.modal-upload .list-picture-card .ant-upload-list-item-error {
+  border-color: transparent !important;
+}
+.modal-upload .ant-tooltip-placement-top {
+  display: none;
 }

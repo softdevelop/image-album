@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
-import { getAllImages, uploadImages } from "../../../redux/actions";
+import {
+  getAllImages,
+  uploadImages,
+  deleteImages,
+} from "../../../redux/actions";
 import "../assets/css/demo.scss";
-import { Row, Col, Modal, Upload, Select } from "antd";
-import { CloudUploadOutlined } from "@ant-design/icons";
+import { Row, Col, Modal, Upload, Select, Checkbox } from "antd";
+import { CloudUploadOutlined, DeleteOutlined } from "@ant-design/icons";
 
 const { Option } = Select;
 
@@ -12,6 +16,7 @@ const Demo = ({
   images,
   uploadImages,
   isUploadSuccess,
+  deleteImages,
   ...props
 }) => {
   const arrAlbums = ["Travel", "Personal", "Food", "Nature", "Other"];
@@ -21,6 +26,7 @@ const Demo = ({
   const [previewTitle, setPreviewTitle] = useState("");
   const [fileList, setFileList] = useState([]);
   const [valueAlbum, setValueAlbum] = useState("");
+  const [listSelectImage, setListSelectImage] = useState([]);
   useEffect(() => {
     getAllImages({ skip: 0, limit: 250 });
   }, []);
@@ -61,15 +67,18 @@ const Demo = ({
   };
 
   const uploadImage = async () => {
-    console.log("3232", valueAlbum, fileList);
     let fd = new FormData();
     fd.append("album", valueAlbum);
     fileList.map((item) => {
       fd.append("documents", item.originFileObj);
     });
-
     await uploadImages(fd);
-    console.log({ isUploadSuccess });
+    if (!isUploadSuccess) {
+      getAllImages({ skip: 0, limit: 250 });
+      setVisible(false);
+      setFileList([]);
+      setValueAlbum("");
+    }
   };
 
   const uploadButton = (
@@ -85,12 +94,45 @@ const Demo = ({
     setValueAlbum(value);
   };
 
+  const deletePhotos = async () => {
+    const arrAlbums = [];
+    listSelectImage.map((item) => {
+      const data = {
+        album: item.album,
+        documents: item.name,
+      };
+      arrAlbums.push(data);
+    });
+
+    await deleteImages(arrAlbums);
+    setListSelectImage([]);
+    getAllImages({ skip: 0, limit: 250 });
+  };
+
+  const selectImage = (item) => {
+    if (!listSelectImage.includes(item)) {
+      setListSelectImage([...listSelectImage, item]);
+    } else {
+      const arr = listSelectImage.filter((i) => i !== item);
+      setListSelectImage([...arr]);
+    }
+  };
+
   return (
     <div className="container-demo">
       <div className="header">
         <h3>Photos</h3>
         <div className="right-header">
-          <div className="upload-space">
+          {listSelectImage.length !== 0 && (
+            <div className="delete-space">
+              <DeleteOutlined className="icon-upload" />
+              <h4 onClick={deletePhotos}>
+                Delete {listSelectImage.length} photos
+              </h4>
+            </div>
+          )}
+
+          <div className="upload-space ">
             <CloudUploadOutlined className="icon-upload" />
             <h4 onClick={showModalUpload}>Upload</h4>
           </div>
@@ -135,7 +177,11 @@ const Demo = ({
                 </Option>
               ))}
             </Select>
-            <div className="upload-space">
+            <div
+              className={`${
+                valueAlbum && fileList.length ? "" : "disable-upload"
+              } upload-space upload-space-modal`}
+            >
               <CloudUploadOutlined className="icon-upload" />
               <h4 onClick={uploadImage}>Upload</h4>
             </div>
@@ -143,15 +189,37 @@ const Demo = ({
         </Modal>
       </div>
       <div className="content-demo">
-        <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
+        <Row type="flex" gutter={16}>
           {images &&
             images.documents &&
             images.documents.map((item) => (
-              <Col className="gutter-row" span={6} className="col-image">
+              <Col className="col-image">
                 <div className="content-image">
-                  <img src={item.raw} alt="Image" className="image-list" />
-                  <h5>{item.name}</h5>
-                  <p>{item.album}</p>
+                  <div>
+                    <img
+                      src={item.raw}
+                      onClick={() => selectImage(item)}
+                      alt="Image"
+                      className={`${
+                        listSelectImage.length &&
+                        !listSelectImage.includes(item)
+                          ? "no-select-image"
+                          : ""
+                      } image-list`}
+                    />
+                    <h5>{item.name}</h5>
+                    <p>{item.album}</p>
+                  </div>
+                  <div
+                    className="checkbox-image"
+                    style={{
+                      display: listSelectImage.includes(item)
+                        ? "block"
+                        : "none",
+                    }}
+                  >
+                    <Checkbox checked></Checkbox>
+                  </div>
                 </div>
               </Col>
             ))}
@@ -164,6 +232,7 @@ const Demo = ({
 const mapActionToProps = {
   getAllImages,
   uploadImages,
+  deleteImages,
 };
 const mapStateToProps = (state) => {
   return {

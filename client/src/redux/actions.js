@@ -1,4 +1,5 @@
-import * as fromDemo from './demo/actions';
+import * as fromDemo from "./demo/actions";
 
-export const getAllImages = fromDemo.getAllImages
-export const uploadImages = fromDemo.uploadImages
+export const getAllImages = fromDemo.getAllImages;
+export const uploadImages = fromDemo.uploadImages;
+export const deleteImages = fromDemo.deleteImages;
