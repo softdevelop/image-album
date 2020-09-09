@@ -11,6 +11,9 @@
       h4 {
         margin-right: 20px;
       }
+      .ant-select-arrow {
+        top: 25% !important;
+      }
     }
     display: flex;
     justify-content: space-between;
@@ -60,6 +63,7 @@
 }
 .upload-space {
   display: flex;
+  margin-top: 4px;
   .icon-upload {
     margin-top: 5px;
     margin-right: 5px;
@@ -91,10 +95,6 @@
 }
 .modal-upload .ant-tooltip-placement-top {
   display: none;
-}
-
-.ant-select-arrow {
-  top: 25% !important;
 }
 
 .btn {

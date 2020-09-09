@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { connect } from "react-redux";
 import {
   getAllImages,
@@ -11,13 +11,7 @@ import { CloudUploadOutlined, DeleteOutlined } from "@ant-design/icons";
 
 const { Option } = Select;
 
-const ListImage = ({
-  getAllImages,
-  images,
-  uploadImages,
-  isUploadSuccess,
-  deleteImages,
-}) => {
+const ListImage = ({ getAllImages, images, uploadImages, deleteImages }) => {
   const arrAlbums = ["Travel", "Personal", "Food", "Nature", "Other"];
   const [visible, setVisible] = useState(false);
   const [previewVisible, setPreviewVisible] = useState(false);
@@ -27,16 +21,33 @@ const ListImage = ({
   const [valueAlbum, setValueAlbum] = useState("");
   const [listSelectImage, setListSelectImage] = useState([]);
   const [valueChange, setValueChange] = useState(25);
-  const [arrImage, setArrImage] = useState([])
-  const [current, setCurrent] = useState(valueChange);
+  const [arrImage, setArrImage] = useState([]);
+  const [isLoadmore, setIsLoadmore] = useState(true);
+  const [isSelect, setIsSelect] = useState(false);
+  const current = valueChange;
 
-  useEffect(() => {
+  const getAllListImages = useCallback(() => {
     getAllImages({ skip: 0, limit: 25 });
-  }, []);
+  }, [getAllImages]);
 
   useEffect(() => {
-    if (images && images.documents)
-      setArrImage([...arrImage, ...images.documents]);
+    getAllListImages();
+  }, [getAllListImages]);
+
+  useEffect(() => {
+    if (images && images.documents) {
+      if (!isSelect) {
+        setArrImage([...arrImage, ...images.documents]);
+      } else {
+        setArrImage(images.documents);
+      }
+    }
+
+    if (images.count === 0 || images.count < images.limit) {
+      setIsLoadmore(false);
+    } else {
+      setIsLoadmore(true);
+    }
   }, [images]);
 
   const showModalUpload = () => {
@@ -77,24 +88,29 @@ const ListImage = ({
     let fd = new FormData();
     fd.append("album", valueAlbum);
     fileList.map((item) => {
-      fd.append("documents", item.originFileObj);
+      return fd.append("documents", item.originFileObj);
     });
-    await uploadImages(fd).then(res => {
-      const imgs = res.data.data.map(item => {
-        return  {
-          ...item,
-          raw : item.raw.replace('http://http://localhost:3000','http://localhost:8888')
+    await uploadImages(fd)
+      .then((res) => {
+        const imgs = res.data.data.map((item) => {
+          return {
+            ...item,
+            raw: item.raw.replace(
+              "http://http://localhost:3000",
+              "http://localhost:8888"
+            ),
+          };
+        });
+        res.data && setArrImage([...imgs, ...arrImage]);
+        if (res.data.message === "OK") {
+          setVisible(false);
+          setFileList([]);
+          setValueAlbum("");
         }
       })
-      res.data && setArrImage([...imgs, ...arrImage]);
-    }).catch(err => { console.log(err); });
-
-    if (!isUploadSuccess) {
-      getAllImages({ skip: 0, limit: 250 });
-      setVisible(false);
-      setFileList([]);
-      setValueAlbum("");
-    }
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   const uploadButton = (
@@ -117,12 +133,12 @@ const ListImage = ({
         album: item.album,
         documents: item.name,
       };
-      arrAlbums.push(data);
+      return arrAlbums.push(data);
     });
 
     await deleteImages(arrAlbums);
     setListSelectImage([]);
-    // getAllImages({ skip: 0, limit: 250 });
+    setArrImage(arrImage.filter((item) => !listSelectImage.includes(item)));
   };
 
   const selectImage = (item) => {
@@ -135,11 +151,13 @@ const ListImage = ({
   };
 
   const loadMore = async () => {
+    setIsSelect(false);
     await getAllImages({ skip: valueChange, limit: valueChange });
-    setValueChange(valueChange + current)
+    setValueChange(+valueChange + +current);
   };
 
   const handleChangeSelect = async (value) => {
+    setIsSelect(true);
     setValueChange(value);
     await getAllImages({ skip: 0, limit: value });
   };
@@ -175,7 +193,7 @@ const ListImage = ({
         <Modal
           className="modal-upload"
           title="Upload Photos"
-          visible={visible && !isUploadSuccess}
+          visible={visible}
           onCancel={handleCancel}
           footer={null}
         >
@@ -213,7 +231,7 @@ const ListImage = ({
             <div
               className={`${
                 valueAlbum && fileList.length ? "" : "disable-upload"
-                } upload-space upload-space-modal`}
+              } upload-space upload-space-modal`}
             >
               <CloudUploadOutlined className="icon-upload" />
               <h4 onClick={uploadImage}>Upload</h4>
@@ -231,13 +249,13 @@ const ListImage = ({
                     <img
                       src={item.raw}
                       onClick={() => selectImage(item)}
-                      alt="Image"
+                      alt={item.raw}
                       className={`${
                         listSelectImage.length &&
-                          !listSelectImage.includes(item)
+                        !listSelectImage.includes(item)
                           ? "no-select-image"
                           : ""
-                        } image-list`}
+                      } image-list`}
                     />
                     <h5>{item.name}</h5>
                     <p>{item.album}</p>
@@ -258,7 +276,11 @@ const ListImage = ({
         </Row>
       </div>
       <div>
-        <button style={valueChange > 53 ? { display: 'none' } : { display: 'block' }} className="btn" onClick={loadMore}>
+        <button
+          style={!isLoadmore ? { display: "none" } : { display: "block" }}
+          className="btn"
+          onClick={loadMore}
+        >
           Load More
         </button>
       </div>
@@ -274,7 +296,6 @@ const mapActionToProps = {
 const mapStateToProps = (state) => {
   return {
     images: state.image.images,
-    isUploadSuccess: state.image.isUploadSuccess,
   };
 };
 
