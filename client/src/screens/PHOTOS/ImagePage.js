@@ -1,10 +1,10 @@
 import React from 'react';
-import { DemoContainer } from './components'
+import { ListImage } from './components'
 
 const DemoPage = ({ demo, ...props }) => {
 
   return (
-    <DemoContainer />
+    <ListImage />
   )
 }
 
