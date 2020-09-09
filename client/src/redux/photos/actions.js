@@ -39,12 +39,6 @@ export function uploadImages(data) {
   return (dispatch) => {
     return request()
       .put(`photos`, data)
-      // .then((response) => {
-      //   dispatch(set_images(response.data));
-      // })
-      // .catch((err) => {
-      //   console.log(err);
-      // });
   };
 }
 

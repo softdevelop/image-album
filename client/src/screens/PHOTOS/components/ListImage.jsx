@@ -8,6 +8,7 @@ import {
 import "../assets/css/index.scss";
 import { Row, Col, Modal, Upload, Select, Checkbox } from "antd";
 import { CloudUploadOutlined, DeleteOutlined } from "@ant-design/icons";
+import { useBottomScrollListener } from "react-bottom-scroll-listener";
 
 const { Option } = Select;
 
@@ -24,7 +25,7 @@ const ListImage = ({ getAllImages, images, uploadImages, deleteImages }) => {
   const [arrImage, setArrImage] = useState([]);
   const [isLoadmore, setIsLoadmore] = useState(true);
   const [isSelect, setIsSelect] = useState(false);
-  const current = valueChange;
+  let current = valueChange;
 
   const getAllListImages = useCallback(() => {
     getAllImages({ skip: 0, limit: 25 });
@@ -152,8 +153,8 @@ const ListImage = ({ getAllImages, images, uploadImages, deleteImages }) => {
 
   const loadMore = async () => {
     setIsSelect(false);
-    await getAllImages({ skip: valueChange, limit: valueChange });
-    setValueChange(+valueChange + +current);
+    current = current + valueChange;
+    await getAllImages({ skip: current, limit: valueChange });
   };
 
   const handleChangeSelect = async (value) => {
@@ -162,8 +163,19 @@ const ListImage = ({ getAllImages, images, uploadImages, deleteImages }) => {
     await getAllImages({ skip: 0, limit: value });
   };
 
+  const handleOnDocumentBottom = useCallback(() => {
+    loadMore();
+  }, []);
+
+  const handleContainerOnBottom = useCallback(() => {
+  }, []);
+
+  useBottomScrollListener(handleOnDocumentBottom);
+
+  const scrollRef = useBottomScrollListener(handleContainerOnBottom);
+
   return (
-    <div className="container-demo">
+    <div ref={scrollRef} className="container-demo">
       <div className="header">
         <h3>Photos</h3>
         <div className="right-header">
@@ -274,15 +286,6 @@ const ListImage = ({ getAllImages, images, uploadImages, deleteImages }) => {
               </Col>
             ))}
         </Row>
-      </div>
-      <div>
-        <button
-          style={!isLoadmore ? { display: "none" } : { display: "block" }}
-          className="btn"
-          onClick={loadMore}
-        >
-          Load More
-        </button>
       </div>
     </div>
   );
